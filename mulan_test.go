@@ -1,7 +1,6 @@
 package mulan
 
 import (
-	"net/http"
 	"testing"
 )
 
@@ -13,6 +12,21 @@ func TestEcho(t *testing.T) {
 		t.Errorf("got %d wang %d", got, want)
 	}
 
-	ml := &OnConnect{}
-	http.ListenAndServe(":9900", ml)
+}
+
+func TestServer(t *testing.T) {
+	t.Run("init server instance", func(t *testing.T) {
+		serv := Server()
+		if "mulan" != serv.Name {
+			t.Error()
+		}
+	})
+
+	t.Run("try listen", func(t *testing.T) {
+		serv := Server()
+		err := serv.Listen("19990")
+		if err != nil {
+			t.Error(err)
+		}
+	})
 }

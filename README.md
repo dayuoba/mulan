@@ -43,12 +43,7 @@ func main() {
         c.Send(ml.JSON{})
     })
 
-    if err := server.Listen("8080"); err != {
-        if err != nil {
-            panic(err)
-        }
-        fmt.Println("server started at 8080")
-    })
+    server.Listen("8080")
 }
 
 ```
