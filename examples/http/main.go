@@ -1,14 +1,15 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+
+	ml "github.com/dayuoba/mulan"
 )
 
 func main() {
-    err := http.ListenAndServe(":9991", nil)
-    if err != nil {
-        fmt.Println(err)
-        panic(err)
-    }
+	s := ml.Server()
+	s.Use(func(c *ml.Context, next ml.Next) {
+		fmt.Println("setting up middleware")
+	})
+	s.Listen(":9999")
 }

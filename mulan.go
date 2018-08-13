@@ -103,6 +103,7 @@ func Server() *HTTPServer {
 	// init a server object
 	serv := new(HTTPServer)
 	serv.Name = "mulan"
+	serv.middlewares = new(Middlewares)
 	fmt.Println(serv)
 
 	return serv
