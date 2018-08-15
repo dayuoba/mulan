@@ -4,8 +4,10 @@
 Todo:
   #### cli tools
   ☐ command parser
+  ✔ middlewares @done(18-08-13 12:21)
   ☐ router impl
-  ☐ server impl
+    ☐ trie
+  ✔ server impl @done(18-08-13 12:20)
   ☐ json impl
   ☐ help info
   #### basic

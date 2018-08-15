@@ -5,13 +5,15 @@ import (
 	"net/http"
 )
 
+// ********** Types ***********
+
 // Handler interface
 type Handler interface {
 	ServeHTTP(res http.ResponseWriter, req *http.Request)
 }
 
 // Middleware ...
-type Middleware func(c *Context, next Next)
+type Middleware func(c *Ctx, next Next)
 
 // Next ...
 type Next func()
@@ -19,23 +21,17 @@ type Next func()
 // Middlewares ...
 type Middlewares []Middleware
 
-// Router ...
-type Router func(c *Context)
+// RouterHandler ...
+type RouterHandler func(c *Ctx)
 
-// HTTPServer ...
-type HTTPServer struct {
-	Name        string
-	Listenning  bool
-	middlewares *Middlewares
-	midLen      int64
-	Routes      []Router
-	Ctx         *Context
-}
+// Route ...
+// the routing path
+type Route string
 
-// Context ...
-type Context struct {
-	_Request  Request
-	_Response Response
+// Ctx ...
+type Ctx struct {
+	_Req Request
+	_Res Response
 }
 
 // Request ...
@@ -44,8 +40,26 @@ type Request *http.Request
 // Response ...
 type Response http.ResponseWriter
 
-func (s *HTTPServer) routes(c *Context) {
+// HTTPServer ...
+type HTTPServer struct {
+	Name        string
+	Listenning  bool
+	middlewares *Middlewares
+	midLen      int64
+	Routes      []RouterHandler
+}
 
+// ********* implementions *********
+
+// Server ...
+// init a instance
+func Server() *HTTPServer {
+	// init a server object
+	serv := new(HTTPServer)
+	serv.Name = "mulan"
+	serv.middlewares = new(Middlewares)
+
+	return serv
 }
 
 // Use ...
@@ -55,28 +69,13 @@ func (s *HTTPServer) Use(mid Middleware) {
 	*s.middlewares = append(*s.middlewares, mid)
 }
 
-// func (s *HTTPServer) mux(c *Context) Middleware {
-// 	return func(c *Context, next Middleware) {
-
-// 	}
-// }
-
-// // Next ...
-// type Next func()
-
-// Mid ...
-type Mid func(c *Context, n Next)
-
-// Mids ...
-type Mids []Mid
-
 // SetupMiddlewares ...
-func (s *HTTPServer) SetupMiddlewares() {
-	NextIter(s.Ctx, 0, s.middlewares)
+func (s *HTTPServer) SetupMiddlewares(ctx *Ctx) {
+	NextIter(ctx, 0, s.middlewares)
 }
 
 // NextIter ...
-func NextIter(ctx *Context, c int, m *Middlewares) {
+func NextIter(ctx *Ctx, c int, m *Middlewares) {
 	(*m)[c](ctx, func() {
 		c++
 		if c < len(*m) {
@@ -87,26 +86,32 @@ func NextIter(ctx *Context, c int, m *Middlewares) {
 
 // Listen ...
 func (s *HTTPServer) Listen(port string) error {
-	return http.ListenAndServe(":"+port, s)
+	fmt.Printf("listening %s\n", port)
+	return http.ListenAndServe(port, s)
 }
 
+// Mux ...
+func (s *HTTPServer) Mux(ctx *Ctx) {
+	fmt.Println(ctx._Req.Method)
+	fmt.Println(ctx._Req.URL.Path)
+	http.Error(ctx._Res, "not found when muxing", 404)
+	return
+}
+
+// Imple http methods for Mux
+
+// Get ...
+func (s *HTTPServer) Get(r Route, handler RouterHandler) {
+	// put this in a trie
+}
+
+// impl http.Handler
 func (s *HTTPServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	s.Ctx._Request = req
-	s.Ctx._Response = res
-	s.SetupMiddlewares()
-
-	http.Error(res, "not found", 404)
-}
-
-// Server ...
-func Server() *HTTPServer {
-	// init a server object
-	serv := new(HTTPServer)
-	serv.Name = "mulan"
-	serv.middlewares = new(Middlewares)
-	fmt.Println(serv)
-
-	return serv
+	ctx := new(Ctx)
+	ctx._Req = req
+	ctx._Res = res
+	s.SetupMiddlewares(ctx)
+	s.Mux(ctx)
 }
 
 // Echo for test
