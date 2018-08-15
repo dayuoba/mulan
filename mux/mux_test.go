@@ -75,6 +75,9 @@ func TestInsert(t *testing.T) {
 	fmt.Println(tr.Root.eages["/"].eages)
 	fmt.Println(tr.Root.eages["/"].eages["ap"].eages)
 	fmt.Println(tr.Root.eages["/"].eages["ap"].eages["i/"].eages)
+
+	s := tr.Find("/api/book")
+	fmt.Println(s)
 	// fmt.Println(tr.Root.eages["/"].eages["api/"].eages)
 	// fmt.Println(tr.Root.eages["/"].eages["ello"].eages)
 	// fmt.Println(tr.Root.eages["/"].eages["/api/user"])

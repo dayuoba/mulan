@@ -80,6 +80,8 @@ const (
 	leaf = iota
 	eage = iota
 	node = iota
+	// PathNotFound ...
+	PathNotFound = ""
 )
 
 // RoutePath ...
@@ -105,7 +107,7 @@ func (t *Trie) New() {
 }
 
 // Find ...
-func (t *Trie) Find(path string) {
+func (t *Trie) Find(path string) string {
 	for key := range t.Root.eages {
 		lcp := LCP(key, path)
 		llcp := len(lcp)
@@ -113,7 +115,23 @@ func (t *Trie) Find(path string) {
 		if llcp == 0 {
 			continue
 		}
+
+		if len(path) < len(key) {
+			return path
+		}
+
+		if path == key {
+			// found
+			return key
+		}
+		cutPath := Cut(path, len(key))
+
+		tr := &Trie{}
+		tr.Root = t.Root.eages[key]
+		return tr.Find(cutPath)
 	}
+
+	return PathNotFound
 }
 
 // Insert ...
