@@ -202,6 +202,10 @@ func LCP(s1, s2 string) string {
 	if len(s1) == 0 || len(s2) == 0 {
 		return s
 	}
+	if s1[0] != s2[0] {
+		return s
+	}
+
 	l1 := len(s1)
 	l2 := len(s2)
 	for i := 0; i < l1; i++ {
