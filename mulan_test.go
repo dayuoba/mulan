@@ -18,6 +18,7 @@ func TestEcho(t *testing.T) {
 func TestListen(t *testing.T) {
 	serv := Server()
 	fmt.Println(serv.Name)
+	fmt.Println(serv.Routes)
 
 	serv.Use(func(c *Ctx, next Next) {
 		fmt.Println("setting up middles 1")
@@ -26,10 +27,16 @@ func TestListen(t *testing.T) {
 
 	serv.Use(func(c *Ctx, next Next) {
 		fmt.Println("setting up middles 2")
+		next()
 	})
 
 	serv.Use(func(c *Ctx, next Next) {
 		fmt.Println("setting up middles 3")
+	})
+
+	serv.Get("/hello", func(c *Ctx) {
+		fmt.Println("router catch")
+		c.Send("hello world")
 	})
 
 	fmt.Println(len(*serv.middlewares))

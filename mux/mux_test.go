@@ -3,11 +3,20 @@ package mux
 import (
 	"fmt"
 	"testing"
+
+	ws "github.com/gorilla/websocket"
 )
 
 type T *testing.T
 
 func TestEcho(t *testing.T) {
+
+	var upgrader = ws.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	fmt.Println(upgrader)
 	// var m *map[string]string
 	a := 1
 	b := 2

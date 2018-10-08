@@ -5,9 +5,15 @@ import (
 	"net/http"
 )
 
-// ********** Types ***********
+//
+// ──────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: T Y P E S   D E F I N I T I O N : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────────
+//
 
-// Handler interface
+// ─── HANDLER INTERFACE ──────────────────────────────────────────────────────────
+
+// Handler ...
 type Handler interface {
 	ServeHTTP(res http.ResponseWriter, req *http.Request)
 }
@@ -28,6 +34,9 @@ type RouterHandler func(c *Ctx)
 // the routing path
 type Route string
 
+// Router ...
+type Router map[Route]RouterHandler
+
 // Ctx ...
 type Ctx struct {
 	_Req Request
@@ -46,18 +55,24 @@ type HTTPServer struct {
 	Listenning  bool
 	middlewares *Middlewares
 	midLen      int64
-	Routes      []RouterHandler
+	Routes      map[string]Router
 }
 
-// ********* implementions *********
+// ─── SERVER IMPLEMENTIONS ───────────────────────────────────────────────────────
 
 // Server ...
 // init a instance
 func Server() *HTTPServer {
 	// init a server object
-	serv := new(HTTPServer)
+	serv := &HTTPServer{}
 	serv.Name = "mulan"
-	serv.middlewares = new(Middlewares)
+	serv.middlewares = &Middlewares{}
+	serv.Routes = map[string]Router{}
+	serv.Routes["GET"] = Router{}
+	serv.Routes["POST"] = Router{}
+	serv.Routes["OPTION"] = Router{}
+	serv.Routes["DELETE"] = Router{}
+	serv.Routes["PUT"] = Router{}
 
 	return serv
 }
@@ -69,8 +84,8 @@ func (s *HTTPServer) Use(mid Middleware) {
 	*s.middlewares = append(*s.middlewares, mid)
 }
 
-// SetupMiddlewares ...
-func (s *HTTPServer) SetupMiddlewares(ctx *Ctx) {
+// CallMids ...
+func (s *HTTPServer) CallMids(ctx *Ctx) {
 	NextIter(ctx, 0, s.middlewares)
 }
 
@@ -92,8 +107,19 @@ func (s *HTTPServer) Listen(port string) error {
 
 // Mux ...
 func (s *HTTPServer) Mux(ctx *Ctx) {
-	fmt.Println(ctx._Req.Method)
-	fmt.Println(ctx._Req.URL.Path)
+	m := ctx._Req.Method
+	// fmt.Println(ctx._Req.Method)
+	p := Route(ctx._Req.URL.Path)
+	// fmt.Println(ctx._Req.URL.Path)
+	fmt.Println(p, m)
+	// fmt.Println(m)
+	fmt.Println(s.Routes)
+	fmt.Println(s.Routes[m])
+	fmt.Println(s.Routes[m][p])
+	if s.Routes[m][p] != nil {
+		s.Routes[m][p](ctx)
+		return
+	}
 	http.Error(ctx._Res, "not found when muxing", 404)
 	return
 }
@@ -102,7 +128,13 @@ func (s *HTTPServer) Mux(ctx *Ctx) {
 
 // Get ...
 func (s *HTTPServer) Get(r Route, handler RouterHandler) {
-	// put this in a trie
+	s.RegisterRoute("GET", r, handler)
+	// TODO put this in a trie
+}
+
+// RegisterRoute ...
+func (s *HTTPServer) RegisterRoute(method string, r Route, handler RouterHandler) {
+	s.Routes[method][r] = handler
 }
 
 // impl http.Handler
@@ -110,8 +142,15 @@ func (s *HTTPServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx := new(Ctx)
 	ctx._Req = req
 	ctx._Res = res
-	s.SetupMiddlewares(ctx)
+	s.CallMids(ctx)
 	s.Mux(ctx)
+}
+
+// ─── CTX IMPLEMENTIONS ──────────────────────────────────────────────────────────
+
+// Send ...
+func (c *Ctx) Send(interface{}) error {
+	return nil
 }
 
 // Echo for test
