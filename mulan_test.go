@@ -36,7 +36,7 @@ func TestListen(t *testing.T) {
 
 	serv.Get("/hello", func(c *Ctx) {
 		fmt.Println("router catch")
-		c.Send("hello world")
+		c.Send("hello world!!")
 	})
 
 	fmt.Println(len(*serv.middlewares))

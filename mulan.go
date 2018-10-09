@@ -108,14 +108,7 @@ func (s *HTTPServer) Listen(port string) error {
 // Mux ...
 func (s *HTTPServer) Mux(ctx *Ctx) {
 	m := ctx._Req.Method
-	// fmt.Println(ctx._Req.Method)
 	p := Route(ctx._Req.URL.Path)
-	// fmt.Println(ctx._Req.URL.Path)
-	fmt.Println(p, m)
-	// fmt.Println(m)
-	fmt.Println(s.Routes)
-	fmt.Println(s.Routes[m])
-	fmt.Println(s.Routes[m][p])
 	if s.Routes[m][p] != nil {
 		s.Routes[m][p](ctx)
 		return
@@ -149,7 +142,13 @@ func (s *HTTPServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // ─── CTX IMPLEMENTIONS ──────────────────────────────────────────────────────────
 
 // Send ...
-func (c *Ctx) Send(interface{}) error {
+func (c *Ctx) Send(rep interface{}) error {
+	switch rep.(type) {
+	case string:
+		v := rep.(string)
+		c._Res.Write([]byte(v))
+		return nil
+	}
 	return nil
 }
 
